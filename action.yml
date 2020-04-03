@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Labeler
+name: Auto Labeler
 author: Jim Schubert
 description: Automatically label issues and pull requests via configuration
 inputs:
