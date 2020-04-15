@@ -74,9 +74,21 @@ func main() {
 
 	log.WithFields(log.Fields{"data": data, "type": eventName}).Debug("Processing event")
 
-	owner := os.Getenv("GITHUB_ACTOR")
+	var owner string
+
+	// GITHUB_REPOSITORY_OWNER is only recently introduced in the runner
+	// see https://github.com/actions/runner/pull/378
+	// GITHUB_REPOSITORY_OWNER would be used by forks
+	// GITHUB_ACTOR would be used by sources where GITHUB_REPOSITORY_OWNER may not exist
+	owner = os.Getenv("GITHUB_REPOSITORY_OWNER")
+	if owner == "" {
+		owner = os.Getenv("GITHUB_ACTOR")
+	}
+
 	repo := os.Getenv("GITHUB_REPOSITORY")
-	repo = strings.Replace(repo, owner+ "/", "", 1)
+	repoParts := strings.Split(repo, "/")
+	repo = repoParts[len(repoParts)-1]
+
 	l, err := labeler.New(owner, repo, eventName, id, &data)
 	if err != nil {
 		log.Fatalf("Could not construct a labeler %s", err)
