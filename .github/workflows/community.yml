@@ -27,8 +27,8 @@ jobs:
     steps:
     - name: Check Labels
       id: labeler
-      # uses: jimschubert/labeler-action@master
+      uses: jimschubert/labeler-action@v1
       # uses: docker://jimschubert/test-labeler:action-0.0.0
-      uses: ./
+      # uses: ./
       with:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
