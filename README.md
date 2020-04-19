@@ -2,6 +2,8 @@
 
 GitHub Action allowing for applying labels to issues and pull requests based on patterns found in the title or description.
 
+> NOTE: Due to limitations on GitHub Actions for [events that trigger workflows](https://help.github.com/en/actions/reference/events-that-trigger-workflows), labels from pull requests coming from forks are not currently supported.
+
 ## Usage
 
 ### Define `.github/labeler.yml`
