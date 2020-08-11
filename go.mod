@@ -18,7 +18,7 @@ go 1.14
 
 require (
 	github.com/google/go-github/v29 v29.0.3
-	github.com/jimschubert/labeler v0.0.1
+	github.com/jimschubert/labeler v0.0.3
 	github.com/sethvargo/go-githubactions v0.1.0
 	github.com/sirupsen/logrus v1.5.0
 )

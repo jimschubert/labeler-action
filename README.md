@@ -2,7 +2,7 @@
 
 GitHub Action allowing for applying labels to issues and pull requests based on patterns found in the title or description.
 
-> NOTE: Due to limitations on GitHub Actions for [events that trigger workflows](https://help.github.com/en/actions/reference/events-that-trigger-workflows), labels from pull requests coming from forks are not currently supported.
+**NOTE** Thanks to the awesome efforts from the people at GitHub, `v2` and later support labeling from forked repositories via the [pull_request_target](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target) event.
 
 ## Usage
 
@@ -101,7 +101,7 @@ name: Community
 on: 
   issues:
     types: [opened, edited, milestoned]
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 jobs:
@@ -112,10 +112,13 @@ jobs:
     steps:
     - name: Check Labels
       id: labeler
-      uses: jimschubert/labeler-action@v1
+      uses: jimschubert/labeler-action@v2
       with:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
+
+Notice that the PR event is [pull_request_target](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target) rather than `pull_request`. The difference is that `pull_request_target` is a newer event which runs in the context of the base repository, allowing access to the secrets necessary to label the pull request.
+If you use `pull_request`, the action will be able to label pull requests originating from the same repository (i.e. no forks!).
 
 ## License
 

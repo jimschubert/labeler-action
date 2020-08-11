@@ -49,7 +49,7 @@ func main() {
 	}
 
 	re := regexp.MustCompile(`\r?\n\s*`)
-	event = re.ReplaceAll(event,[]byte(""))
+	event = re.ReplaceAll(event, []byte(""))
 
 	var id int
 	switch eventName {
@@ -61,7 +61,7 @@ func main() {
 		}
 
 		id = (*issue.Issue).GetNumber()
-	case "pull_request":
+	case "pull_request", "pull_request_target":
 		var pr *github.PullRequestEvent
 		err = json.Unmarshal(event, &pr)
 		if err != nil {
