@@ -19,6 +19,10 @@ inputs:
   GITHUB_TOKEN:
     description: 'Github token for the repository'
     required: true
+  config_path:
+    description: 'Configuration path to labeler config, relative to repository root'
+    required: false
+    default: '.github/labeler.yml'
 branding:
   icon: 'tag'
   color: 'orange'

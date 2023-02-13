@@ -89,7 +89,18 @@ func main() {
 	repoParts := strings.Split(repo, "/")
 	repo = repoParts[len(repoParts)-1]
 
-	l, err := labeler.New(owner, repo, eventName, id, &data)
+	labelOpts := make([]labeler.OptFn, 0)
+	labelOpts = append(labelOpts, labeler.WithOwner(owner))
+	labelOpts = append(labelOpts, labeler.WithRepo(repo))
+	labelOpts = append(labelOpts, labeler.WithEvent(eventName))
+	labelOpts = append(labelOpts, labeler.WithID(id))
+	labelOpts = append(labelOpts, labeler.WithData(data))
+
+	if configPath := act.GetInput("config_path"); configPath != "" {
+		labelOpts = append(labelOpts, labeler.WithConfigPath(configPath))
+	}
+
+	l, err := labeler.NewWithOptions(labelOpts...)
 	if err != nil {
 		log.Fatalf("Could not construct a labeler %s", err)
 	}
