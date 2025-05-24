@@ -27,7 +27,7 @@ jobs:
     steps:
     - name: Check Labels
       id: labeler
-      uses: jimschubert/labeler-action@v1
+      uses: jimschubert/labeler-action@v2
       # uses: docker://jimschubert/test-labeler:action-0.0.0
       # uses: ./
       with:
