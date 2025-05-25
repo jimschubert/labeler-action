@@ -10,6 +10,8 @@ GitHub Action allowing for applying labels to issues and pull requests based on 
 
 This action requires a configuration file defined at `.github/labeler.yml` in your repository. The contents must follow either the *simple* schema or the *full* schema shown below.
 
+**NOTE** The file must exist on your release branch (e.g. `master`, `main`, etc.).
+
 Feel free to use one of the following schema examples to get started.
 
 #### Simple Schema
