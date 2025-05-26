@@ -73,11 +73,15 @@ comments:
 #      title + description of issues and/or prs (see enabled config above)
 #    - 'include' patterns will associate a label if any of these patterns match
 #    - 'exclude' patterns will ignore this label if any of these patterns match
+#    - 'branches' is an optional array of branch names (or patterns) to limit labeling according to PR target branch
 labels:
   'bug':
     include:
       - '\bbug[s]?\b'
     exclude: []
+    branches:
+      - 'master'
+      - 'main'
   'help wanted':
     include:
       - '\bhelp( me)?\b'
