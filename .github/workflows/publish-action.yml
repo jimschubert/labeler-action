@@ -1,0 +1,36 @@
+# Copied from https://github.com/actions/checkout/blob/85e6279cec87321a52edac9c87bce653a07cf6c2/.github/workflows/update-main-version.yml#L1
+# actions/checkout is MIT licensed. See https://github.com/actions/checkout/blob/main/LICENSE
+name: Publish Action Major Tag
+run-name: Publish ${{ github.event.inputs.major_version }} from ${{ github.event.inputs.target }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: The tag or reference to use
+        required: true
+      major_version:
+        type: choice
+        description: The major version to update
+        options:
+          - v3
+          - v2
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      # Note this update workflow can also be used as a rollback tool.
+      # For that reason, it's best to pin `actions/checkout` to a known, stable version
+      # (typically, about two releases back).
+      - uses: actions/checkout@v4.1.6
+        with:
+          fetch-depth: 0
+      - name: Git config
+        run: |
+          git config user.name "Jim Schubert"
+          git config user.email "james.schubert@gmail.com"
+      - name: Tag new target
+        run: git tag -f ${{ github.event.inputs.major_version }} ${{ github.event.inputs.target }}
+      - name: Push new tag
+        run: git push origin ${{ github.event.inputs.major_version }} --force

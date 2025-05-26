@@ -1,0 +1,40 @@
+version: "2"
+severity:
+  default: error
+
+run:
+  timeout: 5m
+  tests: false
+  modules-download-mode: readonly
+
+linters:
+  default: none
+  enable:
+    - govet
+    - staticcheck
+    - unused
+    - funcorder
+    - copyloopvar
+    - ineffassign
+    - misspell
+    - revive
+  settings:
+    funcorder:
+      constructor: false
+    staticcheck:
+      checks:
+        - SA1000  # Invalid regular expression
+        - SA4006  # A value assigned to a variable is never read before being overwritten. Forgotten error check or dead code?
+        - SA4009  # A function argument is overwritten before its first use.
+    revive:
+      severity: warning
+      rules:
+        - name: line-length-limit
+          severity: error
+          arguments: [180]
+        - name: defer
+          severity: error
+          arguments: [[loop, return, recover]]
+
+    misspell:
+      locale: US
