@@ -28,5 +28,5 @@ branding:
   color: 'orange'
 runs:
   using: docker
-  image: docker://jimschubert/labeler-action:latest
+  image: docker://jimschubert/labeler-action:v2
   # image: Dockerfile
