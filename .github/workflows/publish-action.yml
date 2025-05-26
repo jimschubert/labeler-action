@@ -30,7 +30,7 @@ jobs:
         run: |
           set -e
           # Get the major_version (e.g., from env or input)
-          MAJOR_VERSION="${{ env.major_version }}"
+          MAJOR_VERSION="${{ github.event.inputs.major_version }}"
           # Extract the version from line 31 of action.yml
           IMAGE_VERSION=$(sed -nE 's/^ *image: docker:\/\/jimschubert\/labeler-action:(v[0-9]+).*/\1/p' action.yml)
           if [ "$MAJOR_VERSION" != "$IMAGE_VERSION" ]; then
