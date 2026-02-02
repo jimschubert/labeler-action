@@ -1,5 +1,11 @@
 # labeler-action
 
+[![Build Status](https://github.com/jimschubert/labeler-action/actions/workflows/build.yml/badge.svg)](https://github.com/jimschubert/labeler-action/actions/workflows/build.yml) 
+[![Go Version](https://img.shields.io/github/go-mod/go-version/jimschubert/labeler-action)](https://github.com/jimschubert/labeler-action/blob/master/go.mod)
+[![License](https://img.shields.io/github/license/jimschubert/labeler-action)](https://github.com/jimschubert/labeler-action/blob/master/LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/jimschubert/labeler-action)](https://github.com/jimschubert/labeler-action/releases/latest)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Labeler-blue?logo=github)](https://github.com/marketplace/actions/auto-labeler)
+
 GitHub Action allowing for applying labels to issues and pull requests based on patterns found in the title or description.
 
 **NOTE** Thanks to the awesome efforts from the people at GitHub, `v2` and later support labeling from forked repositories via the [pull_request_target](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target) event.
