@@ -16,6 +16,8 @@ github.com/google/go-querystring v1.2.0 h1:yhqkPbu2/OH+V9BfpCVPZkNmUXhb2gBxJArfh
 github.com/google/go-querystring v1.2.0/go.mod h1:8IFJqpSRITyJ8QhQ13bmbeMBDfmeEJZD5A0egEOmkqU=
 github.com/jimschubert/labeler v0.1.5 h1:yZ3mgqpx3HV4tcz/htnd3k26Ud+yIafLcClMViWDvEM=
 github.com/jimschubert/labeler v0.1.5/go.mod h1:aFZKBC4/Ez7Whd0BuypToXSYhBPYYIumbM/Oq1cOQxg=
+github.com/jimschubert/labeler v0.2.4 h1:e+Yz2rBUP3SC8hUy9huQ7AVEfar2MuBiQvsY5QjWOFk=
+github.com/jimschubert/labeler v0.2.4/go.mod h1:uLNn77QpDQbQcltb9r1s5tUR+vmT9iTHQnjJQdyQXWs=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sethvargo/go-githubactions v1.3.2 h1:gkibLr/QjosgNWoCf1V58rTMRZw7xZtSB7dY4atbl1Y=

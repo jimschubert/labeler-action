@@ -14,13 +14,11 @@
 
 module github.com/jimschubert/labeler-action
 
-go 1.24.0
-
-toolchain go1.24.3
+go 1.25
 
 require (
 	github.com/google/go-github/v29 v29.0.3
-	github.com/jimschubert/labeler v0.1.5
+	github.com/jimschubert/labeler v0.2.4
 	github.com/sethvargo/go-githubactions v1.3.2
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
