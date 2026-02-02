@@ -8,7 +8,15 @@
 
 GitHub Action allowing for applying labels to issues and pull requests based on patterns found in the title or description.
 
-**NOTE** Thanks to the awesome efforts from the people at GitHub, `v2` and later support labeling from forked repositories via the [pull_request_target](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target) event.
+## Deprecation Notice
+
+⚠️ **The `GITHUB_TOKEN` input is deprecated and will be removed in v3.** Pass the token via `env` instead:
+
+```yaml
+- uses: jimschubert/labeler-action@v2
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
 
 ## Usage
 
@@ -102,7 +110,7 @@ labels:
 
 ### Create a Workflow
 
-The action requires a single input parameter: `GITHUB_TOKEN`. This token allows the action to access the GitHub API for your account. Workflows automatically provide a default `GITHUB_TOKEN`, which provides full API access. You create a secret from a [new token](https://github.com/settings/tokens) with `public_repo` scope to limit the action's footprint.
+The action requires the `GITHUB_TOKEN` environment variable. This token allows the action to access the GitHub API for your account. Workflows automatically provide a default `GITHUB_TOKEN`, which provides full API access. You can create a secret from a [new token](https://github.com/settings/tokens) with `public_repo` scope to limit the action's footprint.
  
 **NOTE** Binding to issue or pull_request `edit` actions is _not_ recommended.
 
@@ -116,6 +124,10 @@ on:
   pull_request_target:
     types: [opened]
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
 
   labeler:
@@ -125,7 +137,7 @@ jobs:
     - name: Check Labels
       id: labeler
       uses: jimschubert/labeler-action@v2
-      with:
+      env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
 

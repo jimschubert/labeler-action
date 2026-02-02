@@ -41,7 +41,7 @@ func runLabelerFromEnv() error {
 			return fmt.Errorf("missing environment variable 'GITHUB_TOKEN' in labeler action configuration")
 		}
 	} else {
-		fmt.Println("::warning::The GITHUB_TOKEN input is deprecated. Pass it via env instead. See docs for details.")
+		fmt.Println("::warning::The GITHUB_TOKEN input is deprecated and will be removed in v3. Pass it via env instead. See docs for details.")
 	}
 
 	// actions will pass input GITHUB_TOKEN as env INPUT_GITHUB_TOKEN, so set this back to GITHUB_TOKEN for the lib.

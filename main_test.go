@@ -149,3 +149,36 @@ func TestRunLabeler_InvokesLabelerError(t *testing.T) {
 		})
 	})
 }
+
+func TestRunLabeler_DeprecationWarning(t *testing.T) {
+	// Capture stdout to verify deprecation warning
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	// INPUT_GITHUB_TOKEN simulates passing token via 'with:' in actions
+	withEnv("INPUT_GITHUB_TOKEN", "token", func() {
+		withEnv("GITHUB_EVENT_NAME", "issues", func() {
+			withEnv("GITHUB_EVENT_PATH", "testdata/issue.json", func() {
+				withEnv("GITHUB_REPOSITORY", "jimschubert/testrepo", func() {
+					withEnv("GITHUB_REPOSITORY_OWNER", "jimschubert", func() {
+						withMockLabeler(func(mockLabeler *MockLabeler) {
+							err := runLabelerFromEnv()
+							assert.NoError(t, err)
+						})
+					})
+				})
+			})
+		})
+	})
+
+	w.Close()
+	os.Stdout = oldStdout
+
+	var buf [1024]byte
+	n, _ := r.Read(buf[:])
+	output := string(buf[:n])
+
+	assert.Contains(t, output, "::warning::The GITHUB_TOKEN input is deprecated and will be removed in v3. Pass it via env instead. See docs for details.")
+}
+

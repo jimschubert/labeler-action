@@ -19,16 +19,19 @@ on:
   pull_request:
     types: [opened]
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
 
   labeler:
     runs-on: ubuntu-latest
-
     steps:
     - name: Check Labels
       id: labeler
       uses: jimschubert/labeler-action@v2
       # uses: docker://jimschubert/test-labeler:action-0.0.0
       # uses: ./
-      with:
+      env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
