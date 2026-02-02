@@ -42,6 +42,7 @@ dockers_v2:
     tags:
       - "latest"
       - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
       - "v{{ .Major }}"
     dockerfile: release.Dockerfile
     labels:
