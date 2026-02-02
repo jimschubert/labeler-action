@@ -16,9 +16,10 @@ name: Auto Labeler
 author: Jim Schubert
 description: Automatically label issues and pull requests via configuration
 inputs:
+  # TODO(v3): Remove GITHUB_TOKEN input, use env instead
   GITHUB_TOKEN:
     description: 'Github token for the repository'
-    required: true
+    required: false
   config_path:
     description: 'Configuration path to labeler config, relative to repository root'
     required: false

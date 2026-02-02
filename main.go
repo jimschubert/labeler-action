@@ -24,14 +24,17 @@ var newLabelerWithOptions = func(opts ...labeler.OptFn) (executor, error) {
 
 func runLabelerFromEnv() error {
 	eventName := os.Getenv("GITHUB_EVENT_NAME")
+
 	githubToken := act.GetInput("GITHUB_TOKEN")
 	if githubToken == "" {
 		var ok bool
 		// allow for local testing
 		githubToken, ok = os.LookupEnv("GITHUB_TOKEN")
 		if !ok || githubToken == "" {
-			return fmt.Errorf("missing input 'GITHUB_TOKEN' in labeler action configuration")
+			return fmt.Errorf("missing environment variable 'GITHUB_TOKEN' in labeler action configuration")
 		}
+	} else {
+		fmt.Println("::warning::The GITHUB_TOKEN input is deprecated. Pass it via env instead. See docs for details.")
 	}
 
 	// actions will pass input GITHUB_TOKEN as env INPUT_GITHUB_TOKEN, so set this back to GITHUB_TOKEN for the lib.
