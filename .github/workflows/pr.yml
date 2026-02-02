@@ -12,23 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Community
-on: 
-  issues:
-    types: [opened, edited, milestoned]
+# PR workflow: Runs build and lint checks on pull requests.
+# Uses a reusable workflow from jimschubert/.workflows for consistency.
+
+name: Build Go (PR)
+on:
   pull_request:
-    types: [opened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-
-  labeler:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Check Labels
-      id: labeler
-      uses: jimschubert/labeler-action@v2
-      # uses: docker://jimschubert/test-labeler:action-0.0.0
-      # uses: ./
-      with:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  build:
+    uses: jimschubert/.workflows/.github/workflows/go-pr.yml@main
+    with:
+      golangci-lint-version: "v2.7.2"
+    secrets: inherit

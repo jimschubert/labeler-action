@@ -1,0 +1,84 @@
+# Copyright 2020 Jim Schubert
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Update Major Version Tag: Automatically updates the major version tag (e.g., v1)
+# to point to the latest patch release (e.g., v1.0.2) when a release is published.
+# This allows users to reference @v1 and always get the latest v1.x.x version.
+# Can also be triggered manually to force-update a major tag to a specific version.
+
+name: Update Major Version Tag
+run-name: Promote ${{ github.event.inputs.tag }} to Major Version Tag
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to update major version to (e.g., v1.0.1)'
+        required: true
+        type: string
+
+jobs:
+  update-major-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          # PAT is required to push tags when there are any workflow modifications in that tag.
+          token: ${{ secrets.PAT }}
+
+      - name: Extract major version
+        id: version
+        run: |
+          # Use input tag for manual trigger, or extract from GITHUB_REF for release event
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          
+          # Validate tag is not empty
+          if [ -z "$TAG" ]; then
+            echo "::error::Tag is empty. Please provide a valid tag."
+            exit 1
+          fi
+          
+          # Validate tag exists
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag '$TAG' does not exist."
+            exit 1
+          fi
+          
+          # Extract major version (v1 from v1.0.1, v1.2.3, etc.)
+          MAJOR=$(echo "$TAG" | grep -oE '^v[0-9]+')
+          
+          # Validate major version was extracted
+          if [ -z "$MAJOR" ]; then
+            echo "::error::Could not extract major version from '$TAG'. Expected format: v1.0.0"
+            exit 1
+          fi
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "Updating $MAJOR to point to $TAG"
+
+      - name: Update major version tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -fa ${{ steps.version.outputs.major }} ${{ steps.version.outputs.tag }} -m "Update ${{ steps.version.outputs.major }} to ${{ steps.version.outputs.tag }}"
+          git push origin ${{ steps.version.outputs.major }} --force

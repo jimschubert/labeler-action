@@ -1,0 +1,189 @@
+# Copyright 2020 Jim Schubert
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Weekly Docker Rebuild: Periodically rebuilds and pushes Docker images for the
+# latest major.minor.patch tag. Keeps images fresh with updated base images and security patches
+# without creating new GitHub releases. Can also be triggered manually with a specific tag.
+
+name: Weekly Docker Rebuild
+
+on:
+  schedule:
+    # Every Sunday at 17:00 UTC (1:00 PM EDT, 12:00 PM EST)
+    - cron: "0 17 * * 0"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Specific tag to rebuild (e.g., v1.0.2). Leave empty for latest semver tag.'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  # id-token is required for attestation (signing)
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false  # Don't cancel in-progress Docker builds
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  rebuild-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Docker credentials
+        id: check-creds
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+            echo "::error::DOCKER_USERNAME secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+            echo "::error::DOCKER_PASSWORD secret is not set"
+            exit 1
+          fi
+          echo "✅ Docker credentials are configured"
+
+      - name: Find latest semver tag
+        id: find-tag
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            # Fetch tags, filter to major.minor.patch format, sort by version descending, take recent
+            # the sort -V flag is version sort such that v1.0.9 < v1.0.10 (string sort would be v10 < v2)
+            # This might be overkill but I don't trust that gh api will always return tags in desc order.
+            TAG=$(gh api repos/${{ github.repository }}/tags --jq '.[].name' \
+              | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+              | sort -rV \
+              | head -1)
+          fi
+          
+          if [ -z "$TAG" ]; then
+            echo "::error::No semver tag found"
+            exit 1
+          fi
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Found tag: $TAG"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.find-tag.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3.7.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # This looks a bit clunky, but is attempting to be safe in case .goreleaser.yml is ever
+      # updated to incldue a release config section.
+      # It needs to account for release existing or not, as well as disable existing or not.
+      # and disable can exist anywhere under release.
+      # To test this sed operation on Mac, really you need Gnu sed. Otherwise, use sed -i '' locally when testing.
+      - name: Disable GitHub Release in goreleaser config
+        run: |
+          # Check if 'release:' section exists
+          if grep -q '^release:' .goreleaser.yml; then
+            # Check if 'disable:' already exists under release
+            if grep -A1 '^release:' .goreleaser.yml | grep -q 'disable:'; then
+              echo "release.disable already exists, updating to true"
+              sed -i 's/^\([[:space:]]*disable:\).*/\1 true/' .goreleaser.yml
+            else
+              echo "Adding disable: true to existing release section"
+              sed -i '/^release:/a\  disable: true' .goreleaser.yml
+            fi
+          else
+            echo "Adding release section with disable: true"
+            printf '\nrelease:\n  disable: true\n' >> .goreleaser.yml
+          fi
+          echo "Updated .goreleaser.yml:"
+          grep -A2 'release:' .goreleaser.yml || echo "(release section added at end)"
+
+      - name: Run GoReleaser (Docker only)
+        id: goreleaser
+        uses: goreleaser/goreleaser-action@v6
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
+        with:
+          distribution: goreleaser
+          version: latest
+          # Reuse main config with release disabled via sed above
+          # Skip non-docker publishing steps
+          args: release --clean --skip=announce,validate,archive,homebrew
+
+      - name: Extract Docker image info for attestation
+        id: docker-info
+        run: |
+          # Parse goreleaser artifacts to extract Docker image info
+          ARTIFACTS='${{ steps.goreleaser.outputs.artifacts }}'
+          
+          # Extract the first Docker image name (without tag) and its digest
+          # The image name format is: registry/image:tag or image:tag
+          # We need: registry/image (with docker.io as default if no registry)
+          
+          # Get unique image digests (all tags point to same digest)
+          DIGEST=$(echo "$ARTIFACTS" | jq -r '[.[] | select(.type == "Docker Image")] | .[0].extra.Digest')
+          
+          # Get image name from first Docker image, strip the tag
+          FULL_IMAGE=$(echo "$ARTIFACTS" | jq -r '[.[] | select(.type == "Docker Image")] | .[0].name')
+          
+          # Remove tag (everything after last colon)
+          IMAGE_NAME="${FULL_IMAGE%:*}"
+          
+          # If no registry (no slash before image name), prepend docker.io
+          if [[ "$IMAGE_NAME" != *"/"* ]]; then
+            IMAGE_NAME="docker.io/$IMAGE_NAME"
+          elif [[ "$IMAGE_NAME" != *"."* ]]; then
+            # Has slash but no dot in registry part = Docker Hub user/image
+            IMAGE_NAME="docker.io/$IMAGE_NAME"
+          fi
+          
+          echo "image-name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "Docker image for attestation: $IMAGE_NAME@$DIGEST"
+
+      - name: Attest Docker Image
+        uses: actions/attest-build-provenance@v2
+        if: steps.docker-info.outputs.image-name != ''  && steps.docker-info.outputs.digest != ''
+        with:
+          subject-name: ${{ steps.docker-info.outputs.image-name }}
+          subject-digest: ${{ steps.docker-info.outputs.digest }}
+          push-to-registry: true
