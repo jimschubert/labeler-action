@@ -13,10 +13,10 @@
 # limitations under the License.
 
 name: Community
-on: 
+on:
   issues:
     types: [opened, edited, milestoned]
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 permissions:
