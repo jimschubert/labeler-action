@@ -91,7 +91,7 @@ func TestRunLabeler_MissingToken(t *testing.T) {
 			withEnv("GITHUB_EVENT_PATH", "event.json", func() {
 				err := runLabelerFromEnv()
 				assert.Error(t, err)
-				assert.Contains(t, err.Error(), "missing input 'GITHUB_TOKEN' in labeler action configuration")
+				assert.Contains(t, err.Error(), "missing environment variable 'GITHUB_TOKEN' in labeler action configuration")
 			})
 		})
 	})
