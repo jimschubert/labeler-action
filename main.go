@@ -13,6 +13,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	version = "dev"
+	commit  = "none"
+)
+
 type executor interface {
 	Execute() error
 }
@@ -23,6 +28,8 @@ var newLabelerWithOptions = func(opts ...labeler.OptFn) (executor, error) {
 }
 
 func runLabelerFromEnv() error {
+	fmt.Printf("Running labeler %s (%s)\n", version, commit)
+
 	eventName := os.Getenv("GITHUB_EVENT_NAME")
 
 	githubToken := act.GetInput("GITHUB_TOKEN")

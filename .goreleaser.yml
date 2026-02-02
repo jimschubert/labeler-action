@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+before:
+  hooks:
+    - go mod download
+builds:
+  - env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{ .Version }} -X main.commit={{ .ShortCommit }}
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - formats:
+      - tar.gz
+    files:
+      - LICENSE
+      - README.md
+sboms:
+  - id: archive
+    artifacts: archive
+checksum:
+  name_template: checksums.txt
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^chore'
+      - '^test'
+      - '^wip'
+docker_digest:
+  name_template: "digests.txt"
+dockers_v2:
+  - images:
+      - "jimschubert/labeler-action"
+    tags:
+      - "latest"
+      - "{{ .Tag }}"
+      - "v{{ .Major }}"
+    dockerfile: release.Dockerfile
+    labels:
+      "org.opencontainers.image.created": "{{ .Date }}"
+      "org.opencontainers.image.name": "{{ .ProjectName }}"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+      "org.opencontainers.image.version": "{{ .Version }}"
+      "org.opencontainers.image.source": "https://github.com/jimschubert/labeler-action"
+      "org.opencontainers.image.licenses": "Apache-2.0"
+    build_args:
+      APP_NAME: "{{ .ProjectName }}"

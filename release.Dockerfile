@@ -1,0 +1,5 @@
+FROM gcr.io/distroless/static-debian12
+ARG APP_NAME
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/${APP_NAME} /app
+ENTRYPOINT ["/app"]
