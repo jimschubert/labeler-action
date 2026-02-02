@@ -181,7 +181,7 @@ jobs:
           echo "Docker image for attestation: $IMAGE_NAME@$DIGEST"
 
       - name: Attest Docker Image
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         if: steps.docker-info.outputs.image-name != ''  && steps.docker-info.outputs.digest != ''
         with:
           subject-name: ${{ steps.docker-info.outputs.image-name }}
