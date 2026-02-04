@@ -40,5 +40,5 @@ jobs:
   build:
     uses: jimschubert/.workflows/.github/workflows/go-build-goreleaser.yml@main
     with:
-      golangci-lint: "v2.7.2"
+      golangci-lint-version: "v2.7.2"
     secrets: inherit
