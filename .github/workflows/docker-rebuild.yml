@@ -138,7 +138,7 @@ jobs:
 
       - name: Run GoReleaser (Docker only)
         id: goreleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         env:
           GITHUB_TOKEN: ${{ github.token }}
           BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
